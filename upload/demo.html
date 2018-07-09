@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script type="text/javascript" src='jquery.js'></script>
+</head>
+<body>
+<input type="file" name="FileUpload" id="FileUpload" class="btn_uploadimg">
+
+<script type="text/javascript">
+
+    $(".btn_uploadimg").change(function () {
+        var fileObj = document.getElementById("FileUpload").files[0]; // js 获取文件对象
+        if (typeof (fileObj) == "undefined" || fileObj.size <= 0) {
+            alert("请选择图片");
+            return;
+        }
+        var formFile = new FormData();
+        formFile.append("action", "UploadVMKImagePath");
+        formFile.append("file", fileObj);
+
+        var data = formFile;
+//        $.ajax({
+//            url: "http://cms.youyuwo.com/background/upload/api",
+//            data: data,
+//            type: "Post",
+//            headers:{token:'0192023a7bbd73250516f069df18b500'},
+//            dataType: "multipart/form-data",
+//            cache: false,
+//            processData: false,
+//            contentType: false,
+//            success: function (result) {
+//                console.log(123123)
+//                alert("上传完成!");
+//            },
+//        })
+        var ajax = new XMLHttpRequest();
+
+        // 使用post请求
+        ajax.open('post','http://cms.youyuwo.com/background/upload/api');
+        ajax.setRequestHeader('token','0192023a7bbd73250516f069df18b500');
+        ajax.send(formFile);
+        // 注册事件
+        ajax.onreadystatechange = function () {
+            if (ajax.readyState==4&&ajax.status==200) {
+                var data = JSON.parse(ajax.responseText);
+                console.log(data.data.link)
+            }
+        }
+
+    })
+
+
+
+    var Ajax={
+        get: function(url, fn) {
+            var obj = new XMLHttpRequest();  // XMLHttpRequest对象用于在后台与服务器交换数据
+            obj.open('GET', url, true);
+            obj.onreadystatechange = function() {
+                if (obj.readyState == 4 && obj.status == 200 || obj.status == 304) { // readyState == 4说明请求已完成
+                    fn.call(this, obj.responseText);  //从服务器获得数据
+                }
+            };
+            obj.send();
+        },
+        post: function (url, data, fn) {         // datat应为'a=a1&b=b1'这种字符串格式，在jq里如果data为对象会自动将对象转成这种字符串格式
+            var obj = new XMLHttpRequest();
+            obj.open("POST", url, true);
+            obj.setRequestHeader("Content-type", "application/x-www-form-urlencoded");  // 添加http头，发送信息至服务器时内容编码类型
+            obj.onreadystatechange = function() {
+                if (obj.readyState == 4 && (obj.status == 200 || obj.status == 304)) {  // 304未修改
+                    fn.call(this, obj.responseText);
+                }
+            };
+            obj.send(data);
+        }
+    }
+</script>
+</body>
+</html>
